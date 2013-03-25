@@ -4,7 +4,11 @@
 
 (defn find-files [file-name path]
   "TODO: Implement searching for a file using his name as a regexp."
-  nil)
+  (let [start-dir (clojure.java.io/file path)
+        current-file-seq (file-seq start-dir)
+        file-names (map (fn [current-file] (.getName current-file)) current-file-seq)
+        results (filter (fn [current-name] (> (count (re-seq (re-pattern file-name) current-name)) 0)) file-names)] 
+    results))
 
 (defn usage []
   (println "Usage: $ run.sh file_name path"))
