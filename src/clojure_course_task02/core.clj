@@ -2,13 +2,19 @@
   (:gen-class))
 
 
+(defn filter-filename [file regex]
+  "Filter filename by regex"
+  (let [file-name (.getName file)]
+    (if (> (count (re-seq (re-pattern regex) file-name)) 0)
+      file-name)))
+
 (defn find-files [file-name path]
   "TODO: Implement searching for a file using his name as a regexp."
   (let [start-dir (clojure.java.io/file path)
         current-file-seq (file-seq start-dir)
-        file-names (map (fn [current-file] (.getName current-file)) current-file-seq)
-        results (filter (fn [current-name] (> (count (re-seq (re-pattern file-name) current-name)) 0)) file-names)] 
-    results))
+        files-chunks (partition (.availableProcessors (Runtime/getRuntime)) current-file-seq)
+        results (pmap (fn [current-chunk] (map (fn [current-file] (filter-filename current-file file-name)) current-chunk)) files-chunks)]
+    (remove nil? (flatten results))))
 
 (defn usage []
   (println "Usage: $ run.sh file_name path"))
